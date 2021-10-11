@@ -1,0 +1,112 @@
+{
+  "version": 3,
+  "targets": {
+    "net5.0": {
+      "GraphTheory/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "GraphUserInterface": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/GraphTheory.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GraphTheory.dll": {}
+        }
+      },
+      "GraphUserInterface/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "compile": {
+          "bin/placeholder/GraphUserInterface.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GraphUserInterface.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GraphTheory/1.0.0": {
+      "type": "project",
+      "path": "../GraphTheory/GraphTheory.csproj",
+      "msbuildProject": "../GraphTheory/GraphTheory.csproj"
+    },
+    "GraphUserInterface/1.0.0": {
+      "type": "project",
+      "path": "../GraphUserInterface/GraphUserInterface.csproj",
+      "msbuildProject": "../GraphUserInterface/GraphUserInterface.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net5.0": [
+      "GraphTheory >= 1.0.0",
+      "GraphUserInterface >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\User\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\Dependencies\\Dependencies.csproj",
+      "projectName": "Dependencies",
+      "projectPath": "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\Dependencies\\Dependencies.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\Dependencies\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net5.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "projectReferences": {
+            "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\GraphTheory\\GraphTheory.csproj": {
+              "projectPath": "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\GraphTheory\\GraphTheory.csproj"
+            },
+            "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\GraphUserInterface\\GraphUserInterface.csproj": {
+              "projectPath": "C:\\Users\\User\\RiderProjects\\TheoryOfGraphs\\GraphUserInterface\\GraphUserInterface.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net5.0": {
+        "targetAlias": "net5.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

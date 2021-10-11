@@ -1,0 +1,16 @@
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.exe
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.deps.json
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.runtimeconfig.json
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.runtimeconfig.dev.json
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.dll
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\ref\GraphTheory.dll
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.pdb
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.AssemblyInfoInputs.cache
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.AssemblyInfo.cs
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.csproj.CoreCompileInputs.cache
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.dll
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\ref\GraphTheory.dll
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.pdb
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.genruntimeconfig.cache
+C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.csproj.AssemblyReference.cache

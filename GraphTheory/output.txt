@@ -1,0 +1,3 @@
+Saratov Moscow:850 Samara:370 
+Moscow Saratov:850 Samara:560 
+Samara Saratov:370 Moscow:560 
