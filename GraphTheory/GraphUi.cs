@@ -65,6 +65,9 @@ namespace Graph
                     "5. Save Graph to file\n" +
                     "6. Load Graph from file\n" +
                     "7. Print Graph\n" +
+                    "8. Print all nodes with lesser incoming power\n" +
+                    "9. Print all incoming nodes\n" +
+                    "10. Delete all nodes with odd incoming/outgoing power\n" +
                     "0. End Testing\n"
                 );
 
@@ -92,6 +95,15 @@ namespace Graph
                         break;
                     case 7:
                         Console.WriteLine(graph);
+                        break;
+                    case 8:
+                        PrintNodesWithLesserIncomingPower(graph);
+                        break;
+                    case 9:
+                        PrintAllIncomingNodes(graph);
+                        break;
+                    case 10:
+                        DeleteAllOddNodes(graph);
                         break;
                     case 0:
                         return;
@@ -249,6 +261,54 @@ namespace Graph
             }
             
             graph.RemoveEdge(keyFrom, keyTo);
+        }
+
+        public static void PrintNodesWithLesserIncomingPower(Graph<string> graph)
+        {
+            Console.WriteLine("Enter the vertex: ");
+            string key;
+
+            while (true)
+            {
+                key = Console.ReadLine();
+                if (!graph[key])
+                {
+                    Console.WriteLine("Entered incorrect vertex. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            graph.PrintNodesWithLesserIncomingPower(key);
+        }
+
+        public static void PrintAllIncomingNodes(Graph<string> graph)
+        {
+            Console.WriteLine("Enter the vertex: ");
+            string key;
+
+            while (true)
+            {
+                key = Console.ReadLine();
+                if (!graph[key])
+                {
+                    Console.WriteLine("Entered incorrect vertex. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            graph.PrintAllIncomingNodes(key);
+        }
+
+        public static void DeleteAllOddNodes(Graph<string> graph)
+        {
+            Graph<string> newGraph = graph.DeleteAllOddNodes();
+            Console.WriteLine(newGraph);
         }
 
     }

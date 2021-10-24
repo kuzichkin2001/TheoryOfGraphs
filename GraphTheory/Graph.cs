@@ -11,6 +11,7 @@ namespace Graph
         private Dictionary<T, Dictionary<T, int>> _adjacencyList;
         private bool _isWeighted;
         private bool _isDirectional;
+        private List<T> _visited;
         
         // Empty constructor instantiating an adjacency list
         public Graph(bool isWeighted = false, bool isDirectional = false)
@@ -18,6 +19,7 @@ namespace Graph
             this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
             this._isWeighted = isWeighted;
             this._isDirectional = isDirectional;
+            this._visited = new List<T>();
         }
 
         // Constructor that is reading a graph from file with absolute "filePath"
@@ -74,6 +76,8 @@ namespace Graph
                     }
                 }
             }
+
+            this._visited = new List<T>(this._adjacencyList.Count);
         }
 
         // Copy constructor
@@ -90,6 +94,8 @@ namespace Graph
                     _adjacencyList[dict.Key][item.Key] = item.Value;
                 }
             }
+
+            this._visited = new List<T>(this._adjacencyList.Count);
         }
 
         public bool this[string key]
@@ -178,6 +184,75 @@ namespace Graph
                 _adjacencyList[to].Remove(from);
             }
         }
+
+        public int GetIncomingPower(T key)
+        {
+            Dictionary<T, int> currentNode = this._adjacencyList[key];
+
+            return currentNode.Count;
+        }
+
+        public int GetOutgoingPower(T key)
+        {
+            int count = 0;
+
+            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            {
+                if (dict.Value.ContainsKey(key))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public void PrintNodesWithLesserIncomingPower(T key)
+        {
+            int currentIncomingPower = GetIncomingPower(key);
+
+            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            {
+                if (GetIncomingPower(dict.Key) == currentIncomingPower)
+                {
+                    Console.Write("{0} ", dict.Key.ToString());
+                }
+            }
+        }
+
+        public void PrintAllIncomingNodes(T key)
+        {
+            if (!this._isDirectional)
+            {
+                Console.WriteLine("Unable to do this with not directed graph.");
+            }
+            else
+            {
+                foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+                {
+                    if (dict.Value.ContainsKey(key))
+                    {
+                        Console.WriteLine(dict.Key.ToString());
+                    }
+                }
+            }
+        }
+
+        public Graph<T> DeleteAllOddNodes()
+        {
+            Graph<T> graph = this.Copy();
+
+            foreach (KeyValuePair<T, Dictionary<T, int>> dict in graph.AdjacencyList)
+            {
+                int currentPower = graph.GetIncomingPower(dict.Key);
+                if (currentPower % 2 != 0)
+                {
+                    graph.RemoveNode(dict.Key);
+                }
+            }
+
+            return graph;
+        }
         
         // Method saving graph to a file with absolute "filePath"
         public void SaveGraph(string filePath)
@@ -204,6 +279,22 @@ namespace Graph
                 dict.Value.Clear();
             }
             this._adjacencyList.Clear();
+        }
+
+        public Graph<T> Copy()
+        {
+            Graph<T> graph = new Graph<T>();
+
+            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            {
+                graph.AddNode(dict.Key);
+                foreach (KeyValuePair<T, int> item in dict.Value)
+                {
+                    graph.AddEdge(dict.Key, item.Key, item.Value);
+                }
+            }
+
+            return graph;
         }
 
         public override string ToString()
