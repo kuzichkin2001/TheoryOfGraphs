@@ -6,7 +6,7 @@ namespace Graph
     {
         static void Main(string[] args)
         {
-            // string filepath = @"C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\input.txt";
+            // string filepath = @"C:\Users\kuzic\TheoryOfGraphs\GraphTheory\input.txt";
             // Graph<int> intGraph = new Graph<int>(filepath);
             //
             // intGraph.RemoveNode(3);

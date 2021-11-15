@@ -68,11 +68,12 @@ namespace Graph
                     "8. Print all nodes with lesser incoming power\n" +
                     "9. Print all incoming nodes\n" +
                     "10. Delete all nodes with odd incoming/outgoing power\n" +
+                    "11. Check if graph is acycled\n" +
                     "0. End Testing\n"
                 );
 
                 int answer = Convert.ToInt32(Console.ReadLine());
-                string defaultFilePath = @"C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\";
+                string defaultFilePath = @"C:\Users\kuzic\TheoryOfGraphs\GraphTheory\";
                 switch (answer)
                 {
                     case 1:
@@ -88,6 +89,28 @@ namespace Graph
                         RemoveEdge(graph);
                         break;
                     case 5:
+                        if (graph.IsDirectional)
+                        {
+                            if (graph.IsWeighted)
+                            {
+                                graph.SaveGraph($"{defaultFilePath}DirectedWeighted.txt");
+                            }
+                            else
+                            {
+                                graph.SaveGraph($"{defaultFilePath}DirectedNotWeighted.txt");
+                            }
+                        }
+                        else
+                        {
+                            if (graph.IsWeighted)
+                            {
+                                graph.SaveGraph($"{defaultFilePath}notDirectedWeighted.txt");
+                            }
+                            else
+                            {
+                                graph.SaveGraph($"{defaultFilePath}notDirectedNotWeighted.txt");
+                            }
+                        }
                         graph.SaveGraph($"{defaultFilePath}output.txt");
                         break;
                     case 6:
@@ -105,6 +128,9 @@ namespace Graph
                     case 10:
                         DeleteAllOddNodes(graph);
                         break;
+                    case 11:
+                        IsGraphAcycled(graph);
+                        break;
                     case 0:
                         return;
                     default:
@@ -117,7 +143,7 @@ namespace Graph
         public static Graph<string> CreateGraph(bool isWeighted, bool isDirected)
         {
             Graph<string> graph;
-            string defaultFilePath = @"C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\";
+            string defaultFilePath = @"C:\Users\kuzic\TheoryOfGraphs\GraphTheory\";
             if (isWeighted)
             {
                 if (isDirected)
@@ -309,6 +335,11 @@ namespace Graph
         {
             Graph<string> newGraph = graph.DeleteAllOddNodes();
             Console.WriteLine(newGraph);
+        }
+
+        public static void IsGraphAcycled(Graph<string> graph)
+        {
+            graph.IsGraphAcycled();
         }
 
     }

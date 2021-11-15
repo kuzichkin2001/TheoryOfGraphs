@@ -1,17 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Graph
 {
-    public class Graph<T>
+    public class Graph<T> where T : class
     {
         
         private Dictionary<T, Dictionary<T, int>> _adjacencyList;
         private bool _isWeighted;
         private bool _isDirectional;
-        private List<T> _visited;
+        private Dictionary<T, bool> _visited;
         
         // Empty constructor instantiating an adjacency list
         public Graph(bool isWeighted = false, bool isDirectional = false)
@@ -19,7 +20,6 @@ namespace Graph
             this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
             this._isWeighted = isWeighted;
             this._isDirectional = isDirectional;
-            this._visited = new List<T>();
         }
 
         // Constructor that is reading a graph from file with absolute "filePath"
@@ -28,6 +28,8 @@ namespace Graph
             this._isWeighted = isWeighted;
             this._isDirectional = isDirectional;
             this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
+            this._visited = new Dictionary<T, bool>();
+
             using (StreamReader fileReader = new StreamReader(filePath, Encoding.UTF8))
             {
                 string line;
@@ -37,6 +39,7 @@ namespace Graph
                     if (typeof(T) == typeof(int))
                     {
                         int name = Convert.ToInt32(tempArr[0]);
+                        _visited[(T) (object) name] = false;
                         _adjacencyList[(T) (object) name] = new Dictionary<T, int>();
                         for (int i = 1; i < tempArr.Length; ++i)
                         {
@@ -57,6 +60,7 @@ namespace Graph
                     else if (typeof(T) == typeof(string))
                     {
                         string name = tempArr[0];
+                        _visited[(T) (object) name] = false;
                         _adjacencyList[(T) (object) name] = new Dictionary<T, int>();
                         for (int i = 1; i < tempArr.Length; ++i)
                         {
@@ -77,7 +81,14 @@ namespace Graph
                 }
             }
 
-            this._visited = new List<T>(this._adjacencyList.Count);
+        }
+
+        private void ClearVisited()
+        {
+            foreach (var item in this._visited)
+            {
+                this._visited[item.Key] = false;
+            }
         }
 
         // Copy constructor
@@ -94,8 +105,7 @@ namespace Graph
                     _adjacencyList[dict.Key][item.Key] = item.Value;
                 }
             }
-
-            this._visited = new List<T>(this._adjacencyList.Count);
+            
         }
 
         public bool this[string key]
@@ -213,11 +223,13 @@ namespace Graph
 
             foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
             {
-                if (GetIncomingPower(dict.Key) == currentIncomingPower)
+                if (GetIncomingPower(dict.Key) < currentIncomingPower)
                 {
                     Console.Write("{0} ", dict.Key.ToString());
                 }
             }
+
+            Console.WriteLine();
         }
 
         public void PrintAllIncomingNodes(T key)
@@ -253,7 +265,145 @@ namespace Graph
 
             return graph;
         }
+
+        public bool Dfs(T key, ref T cycleStart)
+        {
+            Dictionary<T, int> currentVertex = this._adjacencyList[key];
+
+            foreach (var item in currentVertex)
+            {
+                T to = item.Key;
+                if (!this._visited[to])
+                {
+                    this._visited[to] = true;
+                    if (Dfs(to, ref cycleStart)) return true;
+                }
+                else if (this._visited[to])
+                {
+                    cycleStart = to;
+                    return false;
+                }
+            }
+            
+            return false;
+        }
         
+        
+
+        public void IsGraphAcycled()
+        {
+            T cycleStart = default(T);
+            foreach (var dict in this._adjacencyList)
+            {
+                ClearVisited();
+                if (Dfs(dict.Key, ref cycleStart))
+                {
+                    break;
+                }
+            }
+
+            if (EqualityComparer<T>.Default.Equals(cycleStart, default(T)))
+            {
+                Console.WriteLine("Acycled");
+            }
+            else
+            {
+                Console.WriteLine("Cycled");
+            }
+        }
+
+        public void Bfs(T key, out Dictionary<T, int> dist)
+        {
+            ClearVisited();
+            Queue<T> q = new Queue<T>();
+            q.Enqueue(key);
+            this._visited[key] = true;
+
+            dist = new Dictionary<T, int>();
+            dist[key] = 0;
+
+            int countIteration = 1;
+            while (q.Count != 0)
+            {
+                T vertex = q.Dequeue();
+
+                if (!this._visited[vertex])
+                {
+                    this._visited[vertex] = true;
+                    foreach (var item in this._adjacencyList[vertex])
+                    {
+                        if (!this._visited[item.Key])
+                        {
+                            this._visited[item.Key] = true;
+                            dist[item.Key] = countIteration;
+                            q.Enqueue(item.Key);
+                        }
+                    }
+                }
+                else
+                {
+                    if (dist[vertex] < countIteration)
+                    {
+                        dist[vertex] = countIteration;
+                    }
+                    q.Dequeue();
+                }
+
+                countIteration++;
+            }
+        }
+
+        private int MinRadius(Dictionary<T, int> eccentricities)
+        {
+            int min = Convert.ToInt32(1e9);
+            foreach (var ecc in eccentricities)
+            {
+                min = Math.Min(min, ecc.Value);
+            }
+
+            return min;
+        }
+
+        public List<T> FindGraphCenter()
+        {
+            List<T> centerResult = new List<T>();
+            Dictionary<T, Dictionary<T, int>> dists = new Dictionary<T, Dictionary<T, int>>();
+
+            foreach (var dict in this._adjacencyList)
+            {
+                Dictionary<T, int> currentDist;
+                Bfs(dict.Key, out currentDist);
+                dists[dict.Key] = currentDist;
+            }
+
+            Dictionary<T, int> eccentricities = new Dictionary<T, int>();
+            foreach (var dist in dists)
+            {
+                int max = dist.Value[dist.Key];
+                foreach (var item in dist.Value)
+                {
+                    if (item.Value > max)
+                    {
+                        max = item.Value;
+                    }
+                }
+
+                eccentricities[dist.Key] = max;
+            }
+
+            int radius = MinRadius(eccentricities);
+
+            foreach (var item in eccentricities)
+            {
+                if (item.Value == radius)
+                {
+                    centerResult.Add(item.Key);
+                }
+            }
+
+            return centerResult;
+        }
+
         // Method saving graph to a file with absolute "filePath"
         public void SaveGraph(string filePath)
         {
