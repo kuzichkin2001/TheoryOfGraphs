@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -108,11 +109,11 @@ namespace Graph
             
         }
 
-        public bool this[string key]
+        public bool this[T key]
         {
             get
             {
-                return this._adjacencyList.ContainsKey((T) (object) key);
+                return this._adjacencyList.ContainsKey(key);
             }
         }
 
@@ -402,6 +403,68 @@ namespace Graph
             }
 
             return centerResult;
+        }
+
+        public Dictionary<int, KeyValuePair<T, T>> IncidenceList()
+        {
+            Dictionary<int, KeyValuePair<T, T>> incidenceList = new Dictionary<int, KeyValuePair<T, T>>();
+
+            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            {
+                foreach (KeyValuePair<T, int> item in dict.Value)
+                {
+                    if (!incidenceList.ContainsKey(item.Value))
+                    {
+                        incidenceList.Add(item.Value, new KeyValuePair<T, T>(dict.Key, item.Key));
+                    }
+                }
+            }
+
+            return incidenceList;
+        }
+
+        public Graph<T> MinOstovTree()
+        {
+            Dictionary<int, KeyValuePair<T, T>> incidenceList = IncidenceList();
+            var sortedIncidenceList = incidenceList.OrderBy(n => n.Key);
+
+            HashSet<T> used = new HashSet<T>();
+            Dictionary<int, KeyValuePair<T, T>> answer = new Dictionary<int, KeyValuePair<T, T>>();
+
+            foreach (KeyValuePair<int, KeyValuePair<T, T>> item in sortedIncidenceList)
+            {
+                if (!used.Contains(item.Value.Key) || !used.Contains(item.Value.Value))
+                {
+                    answer.Add(item.Key, item.Value);
+                    if (!used.Contains(item.Value.Key))
+                    {
+                        used.Add(item.Value.Key);
+                    }
+
+                    if (!used.Contains(item.Value.Value))
+                    {
+                        used.Add(item.Value.Value);
+                    }
+                }
+            }
+
+            Graph<T> graph = new Graph<T>(true, false);
+            foreach (var item in answer)
+            {
+                if (!graph[item.Value.Key])
+                {
+                    graph.AddNode(item.Value.Key);
+                }
+
+                if (!graph[item.Value.Value])
+                {
+                    graph.AddNode(item.Value.Value);
+                }
+                
+                graph.AddEdge(item.Value.Key, item.Value.Value, item.Key);
+            }
+
+            return graph;
         }
 
         // Method saving graph to a file with absolute "filePath"

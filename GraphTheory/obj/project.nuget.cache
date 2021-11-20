@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "/SvkUYIJzisVk4SDSbW8YdxwN6siY48L6oiTmkPdB2APZK8Rh8R9jYI3ucfBxt0vViex+xd915BanekkW2KifQ==",
+  "dgSpecHash": "2ORGx1Lu+xTkg5sbsuRVCvV77XupXCxeB4bPG661QzSamb14QxGUUoMg/au5S52lAZLj7SYDkcMfhft+HdYAMA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\kuzic\\TheoryOfGraphs\\GraphTheory\\GraphTheory.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Павел\\Desktop\\Git repositories\\TheoryOfGraphs\\GraphTheory\\GraphTheory.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Павел\\.nuget\\packages\\microsoft.netcore.app.ref\\5.0.0\\microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\Павел\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\5.0.0\\microsoft.windowsdesktop.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\Павел\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\5.0.0\\microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\Павел\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\5.0.12\\microsoft.netcore.app.host.win-x64.5.0.12.nupkg.sha512"
+  ],
   "logs": []
 }

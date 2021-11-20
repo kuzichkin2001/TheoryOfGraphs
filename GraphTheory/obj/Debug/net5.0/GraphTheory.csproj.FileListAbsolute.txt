@@ -30,3 +30,19 @@ C:\Users\kuzic\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.dll
 C:\Users\kuzic\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\ref\GraphTheory.dll
 C:\Users\kuzic\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.pdb
 C:\Users\kuzic\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.genruntimeconfig.cache
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.csproj.AssemblyReference.cache
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.AssemblyInfoInputs.cache
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.AssemblyInfo.cs
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.csproj.CoreCompileInputs.cache
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.dll
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\ref\GraphTheory.dll
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.pdb
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.exe
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.deps.json
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.runtimeconfig.json
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.runtimeconfig.dev.json
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.dll
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\ref\GraphTheory.dll
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\bin\Debug\net5.0\GraphTheory.pdb
+C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\obj\Debug\net5.0\GraphTheory.genruntimeconfig.cache

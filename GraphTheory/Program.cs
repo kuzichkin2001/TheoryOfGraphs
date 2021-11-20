@@ -27,7 +27,15 @@ namespace Graph
             // string outputFilepath = @"C:\Users\User\RiderProjects\TheoryOfGraphs\GraphTheory\output.txt";
             // stringGraph.SaveGraph(outputFilepath);
             
-            GraphUi.Start();
+            // GraphUi.Start();
+
+            Graph<string> stringGraph = new Graph<string>(
+                @"C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\notDirectedWeighted.txt",
+                true,
+                false
+            );
+            Graph<string> graph = stringGraph.MinOstovTree();
+            Console.WriteLine(graph.ToString());
         }
     }
 }
