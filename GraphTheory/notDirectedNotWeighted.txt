@@ -1,3 +1,5 @@
-Saratov Moscow
-Moscow Samara
-Samara
+Moscow Saratov Samara Kiev
+Saratov Moscow SPb Samara Kiev
+SPb Samara Saratov
+Samara Moscow SPb Saratov
+Kiev Saratov Moscow

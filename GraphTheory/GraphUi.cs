@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Graph
 {
@@ -53,7 +55,7 @@ namespace Graph
                 }
             }
 
-            Graph<string> graph = CreateGraph(isWeighted, isDirected);
+            Graph graph = CreateGraph(isWeighted, isDirected);
             while (true)
             {
                 Console.WriteLine("You have a few options:");
@@ -69,11 +71,16 @@ namespace Graph
                     "9. Print all incoming nodes\n" +
                     "10. Delete all nodes with odd incoming/outgoing power\n" +
                     "11. Check if graph is acycled\n" +
+                    "12. Find the graph center\n" +
+                    "13. Find minimum ostov tree (Kraskal)\n" +
+                    "14. N-perifery of graph (Dijkstra)\n" +
+                    "15. All shortest paths in pairs (Floyd)\n" +
+                    "16. All shortest paths from vertex U (Ford-Bellman)\n" +
                     "0. End Testing\n"
                 );
 
                 int answer = Convert.ToInt32(Console.ReadLine());
-                string defaultFilePath = @"C:\Users\kuzic\TheoryOfGraphs\GraphTheory\";
+                string defaultFilePath = @"C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\";
                 switch (answer)
                 {
                     case 1:
@@ -131,6 +138,21 @@ namespace Graph
                     case 11:
                         IsGraphAcycled(graph);
                         break;
+                    case 12:
+                        Center(graph);
+                        break;
+                    case 13:
+                        Kraskal(graph);
+                        break;
+                    case 14:
+                        Dijkstra(graph);
+                        break;
+                    case 15:
+                        Floyd(graph);
+                        break;
+                    case 16:
+                        FordBellman(graph);
+                        break;
                     case 0:
                         return;
                     default:
@@ -140,37 +162,37 @@ namespace Graph
             }
         }
 
-        public static Graph<string> CreateGraph(bool isWeighted, bool isDirected)
+        public static Graph CreateGraph(bool isWeighted, bool isDirected)
         {
-            Graph<string> graph;
-            string defaultFilePath = @"C:\Users\kuzic\TheoryOfGraphs\GraphTheory\";
+            Graph graph;
+            string defaultFilePath = @"C:\Users\Павел\Desktop\Git repositories\TheoryOfGraphs\GraphTheory\";
             if (isWeighted)
             {
                 if (isDirected)
                 {
-                    graph = new Graph<string>($"{defaultFilePath}DirectedWeighted.txt", isWeighted, isDirected);
+                    graph = new Graph($"{defaultFilePath}DirectedWeighted.txt", isWeighted, isDirected);
                 }
                 else
                 {
-                    graph = new Graph<string>($"{defaultFilePath}notDirectedWeighted.txt", isWeighted, isDirected);
+                    graph = new Graph($"{defaultFilePath}notDirectedWeighted.txt", isWeighted, isDirected);
                 }
             }
             else
             {
                 if (isDirected)
                 {
-                    graph = new Graph<string>($"{defaultFilePath}DirectedNotWeighted.txt", isWeighted, isDirected);
+                    graph = new Graph($"{defaultFilePath}DirectedNotWeighted.txt", isWeighted, isDirected);
                 }
                 else
                 {
-                    graph = new Graph<string>($"{defaultFilePath}notDirectedNotWeighted.txt", isWeighted, isDirected);
+                    graph = new Graph($"{defaultFilePath}notDirectedNotWeighted.txt", isWeighted, isDirected);
                 }
             }
 
             return graph;
         }
 
-        private static void AddNode(Graph<string> graph)
+        private static void AddNode(Graph graph)
         {
             Console.Write("Enter the name of your vertex: ");
             string keyToAdd;
@@ -189,7 +211,7 @@ namespace Graph
             }
         }
 
-        private static void AddEdge(Graph<string> graph)
+        private static void AddEdge(Graph graph)
         {
             Console.Write("Enter the name of first vertex: ");
             string keyFrom;
@@ -234,7 +256,7 @@ namespace Graph
             }
         }
 
-        private static void RemoveNode(Graph<string> graph)
+        private static void RemoveNode(Graph graph)
         {
             Console.Write("Enter the of a vertex to remove: ");
             string keyToRemove;
@@ -254,7 +276,7 @@ namespace Graph
             graph.RemoveNode(keyToRemove);
         }
 
-        private static void RemoveEdge(Graph<string> graph)
+        private static void RemoveEdge(Graph graph)
         {
             Console.Write("Enter the first vertex: ");
             string keyFrom;
@@ -289,7 +311,7 @@ namespace Graph
             graph.RemoveEdge(keyFrom, keyTo);
         }
 
-        public static void PrintNodesWithLesserIncomingPower(Graph<string> graph)
+        public static void PrintNodesWithLesserIncomingPower(Graph graph)
         {
             Console.WriteLine("Enter the vertex: ");
             string key;
@@ -310,7 +332,7 @@ namespace Graph
             graph.PrintNodesWithLesserIncomingPower(key);
         }
 
-        public static void PrintAllIncomingNodes(Graph<string> graph)
+        public static void PrintAllIncomingNodes(Graph graph)
         {
             Console.WriteLine("Enter the vertex: ");
             string key;
@@ -331,16 +353,175 @@ namespace Graph
             graph.PrintAllIncomingNodes(key);
         }
 
-        public static void DeleteAllOddNodes(Graph<string> graph)
+        public static void DeleteAllOddNodes(Graph graph)
         {
-            Graph<string> newGraph = graph.DeleteAllOddNodes();
+            Graph newGraph = graph.DeleteAllOddNodes();
             Console.WriteLine(newGraph);
         }
 
-        public static void IsGraphAcycled(Graph<string> graph)
+        public static void IsGraphAcycled(Graph graph)
         {
-            graph.IsGraphAcycled();
+            Console.WriteLine("Enter the vertex: ");
+            string key;
+
+            while (true)
+            {
+                key = Console.ReadLine();
+                if (!graph[key])
+                {
+                    Console.WriteLine("Entered incorrect vertex. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // graph.IsGraphAcycled();
         }
 
+        public static void Center(Graph graph)
+        {
+            graph.Center();
+        }
+
+        public static void Kraskal(Graph graph)
+        {
+            Graph newGraph = graph.MinOstovTree();
+            newGraph.ClearVisited();
+            List<string> comp = new List<string>();
+            foreach (var vertex in newGraph.AdjacencyList.Keys)
+            {
+                comp.Clear();
+                if (!newGraph.Dfs(vertex, ref comp))
+                {
+                    if (comp.Count != 1)
+                    {
+                        Console.WriteLine("Component:");
+                        foreach (var item in comp)
+                        {
+                            Console.Write($"{item} ");
+                        }
+
+                        Console.WriteLine();   
+                    }
+                };
+            }
+            
+            Console.WriteLine("Min ostov tree:");
+            
+            Console.WriteLine(newGraph);
+        }
+
+        public static void Dijkstra(Graph graph)
+        {
+            Console.WriteLine("Enter the vertex: ");
+            string key;
+
+            while (true)
+            {
+                key = Console.ReadLine();
+                if (!graph[key])
+                {
+                    Console.WriteLine("Entered incorrect vertex. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            Console.WriteLine("Enter the N: ");
+            int N;
+
+            while (true)
+            {
+                N = Convert.ToInt32(Console.ReadLine());
+                if (N <= 0)
+                {
+                    Console.WriteLine("Entered incorrect N. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Dictionary<string, long> dists = graph.Dijkstra(key);
+
+            Console.WriteLine();
+            foreach (var item in dists)
+            {
+                Console.WriteLine($"{item.Key} ---- {item.Value}");
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine($"{N}-perifery of vertex {key} is:\n");
+
+            foreach (var item in dists)
+            {
+                if (item.Value > N)
+                {
+                    Console.Write($"{item.Key} ");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        public static void Floyd(Graph graph)
+        {
+            Dictionary<string, Dictionary<string, long>> dists =
+                graph.Floyd();
+
+            foreach (var dict in dists)
+            {
+                Console.WriteLine($"Shortest paths to {dict.Key.ToString()}:\n");
+
+                foreach (var item in dict.Value)
+                {
+                    if (item.Value != Int32.MaxValue && item.Value != 0)
+                    {
+                        Console.WriteLine($"Vertex {item.Key.ToString()} : Weight {item.Value}");
+                    }
+                }
+
+                Console.WriteLine("\n");
+            }
+        }
+
+        public static void FordBellman(Graph graph)
+        {
+            Console.WriteLine("Enter the vertex: ");
+            string key;
+
+            while (true)
+            {
+                key = Console.ReadLine();
+                if (!graph[key])
+                {
+                    Console.WriteLine("Entered incorrect vertex. Try again.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Dictionary<string, long> dists = graph.FordBellman(key);
+
+            Console.WriteLine($"Shortest paths from {key} are:\n");
+
+            foreach (var edge in dists)
+            {
+                if (edge.Value != Int32.MaxValue && edge.Value != 0)
+                {
+                    Console.WriteLine($"To vertex {edge.Key} length is {edge.Value}");
+                }
+            }
+
+            Console.WriteLine();
+        }
     }
 }

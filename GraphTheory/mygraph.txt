@@ -1,0 +1,5 @@
+﻿Moscow Saratov:700 Samara:800 Kiev:900
+Saratov Moscow:700 SPb:-1100 Samara:-400 Kiev:1000
+SPb Samara:1200 Saratov:-1100
+Samara Moscow:800 SPb:1200 Saratov:-400
+Kiev Saratov:1000 Moscow:900

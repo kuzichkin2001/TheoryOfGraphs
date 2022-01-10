@@ -1,26 +1,32 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml;
+using Microsoft.VisualBasic;
 
 namespace Graph
 {
-    public class Graph<T> where T : class
+    public class Graph
     {
         
-        private Dictionary<T, Dictionary<T, int>> _adjacencyList;
+        private Dictionary<string, Dictionary<string, int>> _adjacencyList;
         private bool _isWeighted;
         private bool _isDirectional;
-        private Dictionary<T, bool> _visited;
+        private Dictionary<string, bool> _visited;
+        private List<string> _allNodes;
         
         // Empty constructor instantiating an adjacency list
         public Graph(bool isWeighted = false, bool isDirectional = false)
         {
-            this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
+            this._adjacencyList = new Dictionary<string, Dictionary<string, int>>();
             this._isWeighted = isWeighted;
             this._isDirectional = isDirectional;
+
+            this._visited = new Dictionary<string, bool>();
         }
 
         // Constructor that is reading a graph from file with absolute "filePath"
@@ -28,8 +34,8 @@ namespace Graph
         {
             this._isWeighted = isWeighted;
             this._isDirectional = isDirectional;
-            this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
-            this._visited = new Dictionary<T, bool>();
+            this._adjacencyList = new Dictionary<string, Dictionary<string, int>>();
+            this._visited = new Dictionary<string, bool>();
 
             using (StreamReader fileReader = new StreamReader(filePath, Encoding.UTF8))
             {
@@ -37,46 +43,22 @@ namespace Graph
                 while ((line = fileReader.ReadLine()) != null)
                 {
                     string[] tempArr = line.Split();
-                    if (typeof(T) == typeof(int))
+                    string name = tempArr[0];
+                    _visited[name] = false;
+                    _adjacencyList[name] = new Dictionary<string, int>();
+                    for (int i = 1; i < tempArr.Length; ++i)
                     {
-                        int name = Convert.ToInt32(tempArr[0]);
-                        _visited[(T) (object) name] = false;
-                        _adjacencyList[(T) (object) name] = new Dictionary<T, int>();
-                        for (int i = 1; i < tempArr.Length; ++i)
+                        if (_isWeighted)
                         {
-                            if (this._isWeighted)
-                            {
-                                string[] subTemp = tempArr[i].Split(':');
-                                int subName = Convert.ToInt32(subTemp[0]);
-                                int weight = Convert.ToInt32(subTemp[1]);
-                                _adjacencyList[(T) (object) name][(T) (object) subName] = weight;
-                            }
-                            else
-                            {
-                                int subName = Convert.ToInt32(tempArr[i]);
-                                _adjacencyList[(T) (object) name][(T) (object) subName] = 0;
-                            }
+                            string[] subTemp = tempArr[i].Split(':');
+                            string subName = subTemp[0];
+                            int weight = Convert.ToInt32(subTemp[1]);
+                            _adjacencyList[name][subName] = weight;
                         }
-                    }
-                    else if (typeof(T) == typeof(string))
-                    {
-                        string name = tempArr[0];
-                        _visited[(T) (object) name] = false;
-                        _adjacencyList[(T) (object) name] = new Dictionary<T, int>();
-                        for (int i = 1; i < tempArr.Length; ++i)
+                        else
                         {
-                            if (_isWeighted)
-                            {
-                                string[] subTemp = tempArr[i].Split(':');
-                                string subName = subTemp[0];
-                                int weight = Convert.ToInt32(subTemp[1]);
-                                _adjacencyList[(T) (object) name][(T) (object) subName] = weight;
-                            }
-                            else
-                            {
-                                string subName = tempArr[i];
-                                _adjacencyList[(T) (object) name][(T) (object) subName] = 0;
-                            }
+                            string subName = tempArr[i];
+                            _adjacencyList[name][subName] = 1;
                         }
                     }
                 }
@@ -84,24 +66,35 @@ namespace Graph
 
         }
 
-        private void ClearVisited()
+        public void ClearVisited()
         {
-            foreach (var item in this._visited)
+            foreach (var item in _adjacencyList.Keys)
             {
-                this._visited[item.Key] = false;
+                this._visited[item] = false;
+            }
+        }
+
+        private void InstantiateAllNodesList()
+        {
+            _allNodes = new List<string>();
+
+            foreach (var dict in _adjacencyList)
+            {
+                _allNodes.Add(dict.Key);
             }
         }
 
         // Copy constructor
-        public Graph(Graph<T> graph)
+        public Graph(Graph graph)
         {
             this._isWeighted = graph.IsWeighted;
             this._isDirectional = graph.IsDirectional;
-            this._adjacencyList = new Dictionary<T, Dictionary<T, int>>();
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in graph.AdjacencyList)
+            this._adjacencyList = new Dictionary<string, Dictionary<string, int>>();
+            this._visited = new Dictionary<string, bool>();
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in graph.AdjacencyList)
             {
-                _adjacencyList[dict.Key] = new Dictionary<T, int>();
-                foreach (KeyValuePair<T, int> item in dict.Value)
+                _adjacencyList[dict.Key] = new Dictionary<string, int>();
+                foreach (KeyValuePair<string, int> item in dict.Value)
                 {
                     _adjacencyList[dict.Key][item.Key] = item.Value;
                 }
@@ -109,7 +102,7 @@ namespace Graph
             
         }
 
-        public bool this[T key]
+        public bool this[string key]
         {
             get
             {
@@ -117,8 +110,27 @@ namespace Graph
             }
         }
 
+        public int this[string from, string to]
+        {
+            get
+            {
+                if (_adjacencyList[from].ContainsKey(to))
+                {
+                    return _adjacencyList[from][to];
+                }
+                else
+                {
+                    return Int32.MaxValue;
+                }
+            }
+            set
+            {
+                _adjacencyList[from][to] = value;
+            }
+        }
+
         // Property providing access to adjacency list of Graph
-        public Dictionary<T, Dictionary<T, int>> AdjacencyList
+        public Dictionary<string, Dictionary<string, int>> AdjacencyList
         {
             get
             {
@@ -143,13 +155,13 @@ namespace Graph
         }
 
         // Method adding new vertex to Graph by key
-        public void AddNode(T key)
+        public void AddNode(string key)
         {
-            _adjacencyList.Add(key, new Dictionary<T, int>());
+            _adjacencyList.Add(key, new Dictionary<string, int>());
         }
         
         // Method Adding new edge between "from" and "to" vertexes with weight "weight" in Graph
-        public void AddEdge(T from, T to, int weight = 1)
+        public void AddEdge(string from, string to, int weight = 1)
         {
             if (this._isWeighted)
             {
@@ -170,11 +182,11 @@ namespace Graph
         }
 
         // Method removing vertex from Graph by key
-        public void RemoveNode(T key)
+        public void RemoveNode(string key)
         {
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in _adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in _adjacencyList)
             {
-                foreach (KeyValuePair<T, int> item in dict.Value)
+                foreach (KeyValuePair<string, int> item in dict.Value)
                 {
                     if (item.Key.Equals(key))
                     {
@@ -187,7 +199,7 @@ namespace Graph
         }
 
         // Method removing edge between "from" and "to" vertexes in Graph
-        public void RemoveEdge(T from, T to)
+        public void RemoveEdge(string from, string to)
         {
             _adjacencyList[from].Remove(to);
             if (!_isDirectional)
@@ -196,18 +208,18 @@ namespace Graph
             }
         }
 
-        public int GetIncomingPower(T key)
+        public int GetOutgoingPower(string key)
         {
-            Dictionary<T, int> currentNode = this._adjacencyList[key];
+            Dictionary<string, int> currentNode = this._adjacencyList[key];
 
             return currentNode.Count;
         }
 
-        public int GetOutgoingPower(T key)
+        public int GetIncomingPower(string key)
         {
             int count = 0;
 
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
             {
                 if (dict.Value.ContainsKey(key))
                 {
@@ -218,11 +230,11 @@ namespace Graph
             return count;
         }
 
-        public void PrintNodesWithLesserIncomingPower(T key)
+        public void PrintNodesWithLesserIncomingPower(string key)
         {
             int currentIncomingPower = GetIncomingPower(key);
 
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
             {
                 if (GetIncomingPower(dict.Key) < currentIncomingPower)
                 {
@@ -233,7 +245,7 @@ namespace Graph
             Console.WriteLine();
         }
 
-        public void PrintAllIncomingNodes(T key)
+        public void PrintAllIncomingNodes(string key)
         {
             if (!this._isDirectional)
             {
@@ -241,7 +253,7 @@ namespace Graph
             }
             else
             {
-                foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+                foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
                 {
                     if (dict.Value.ContainsKey(key))
                     {
@@ -251,13 +263,27 @@ namespace Graph
             }
         }
 
-        public Graph<T> DeleteAllOddNodes()
+        public Graph DeleteAllOddNodes()
         {
-            Graph<T> graph = this.Copy();
+            Graph graph = Copy();
 
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in graph.AdjacencyList)
+            Dictionary<string, int> powers = new Dictionary<string, int>();
+
+            foreach (var dict in _adjacencyList)
             {
-                int currentPower = graph.GetIncomingPower(dict.Key);
+                if (_isDirectional)
+                {
+                    powers.Add(dict.Key, GetIncomingPower(dict.Key) + GetOutgoingPower(dict.Key));
+                }
+                else
+                {
+                    powers.Add(dict.Key, GetIncomingPower(dict.Key));
+                }
+            }
+
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in _adjacencyList)
+            {
+                int currentPower = powers[dict.Key];
                 if (currentPower % 2 != 0)
                 {
                     graph.RemoveNode(dict.Key);
@@ -267,155 +293,143 @@ namespace Graph
             return graph;
         }
 
-        public bool Dfs(T key, ref T cycleStart)
+        public bool Dfs(string key, ref List<string> comp)
         {
-            Dictionary<T, int> currentVertex = this._adjacencyList[key];
-
-            foreach (var item in currentVertex)
+            _visited[key] = true;
+            comp.Add(key);
+            foreach (var item in _adjacencyList[key])
             {
-                T to = item.Key;
-                if (!this._visited[to])
-                {
-                    this._visited[to] = true;
-                    if (Dfs(to, ref cycleStart)) return true;
-                }
-                else if (this._visited[to])
-                {
-                    cycleStart = to;
-                    return false;
-                }
+                string to = item.Key;
+                if (!_visited[to] && Dfs(to, ref comp)) return true;
             }
-            
+
             return false;
         }
-        
-        
 
-        public void IsGraphAcycled()
+        // public void IsGraphAcycled()
+        // {
+        //     Dictionary<string, int> colors = new Dictionary<string, int>();
+        //     string cycleStart = "-1";
+        //     
+        //     foreach (var item in _adjacencyList)
+        //     {
+        //         colors.Add(item.Key, 0);
+        //     }
+        //
+        //     foreach (var item in _adjacencyList)
+        //     {
+        //         if (Dfs(item.Key, ref colors, ref cycleStart))
+        //         {
+        //             break;
+        //         }
+        //     }
+        //
+        //     if (cycleStart == "-1")
+        //     {
+        //         Console.WriteLine("Acycled");
+        //     }
+        //     else
+        //     {
+        //         Console.WriteLine("Cycled");
+        //     }
+        // }
+        
+        public Dictionary<string, Dictionary<string, long>> ShortPaths()
         {
-            T cycleStart = default(T);
-            foreach (var dict in this._adjacencyList)
+            ClearVisited();
+            InstantiateAllNodesList();
+
+            Dictionary<string, Dictionary<string, long>> dists = new Dictionary<string, Dictionary<string, long>>();
+
+            foreach (var item in _allNodes)
             {
-                ClearVisited();
-                if (Dfs(dict.Key, ref cycleStart))
+                dists.Add(item, new Dictionary<string, long>());
+                foreach (var jtem in _allNodes)
                 {
-                    break;
+                    if (item.Equals(jtem))
+                    {
+                        dists[item].Add(jtem, 0);
+                    }
+                    else
+                    {
+                        dists[item].Add(jtem, this[item, jtem]);
+                    }
                 }
             }
 
-            if (EqualityComparer<T>.Default.Equals(cycleStart, default(T)))
+            foreach (var ktem in _allNodes)
             {
-                Console.WriteLine("Acycled");
-            }
-            else
-            {
-                Console.WriteLine("Cycled");
-            }
-        }
-
-        public void Bfs(T key, out Dictionary<T, int> dist)
-        {
-            ClearVisited();
-            Queue<T> q = new Queue<T>();
-            q.Enqueue(key);
-            this._visited[key] = true;
-
-            dist = new Dictionary<T, int>();
-            dist[key] = 0;
-
-            int countIteration = 1;
-            while (q.Count != 0)
-            {
-                T vertex = q.Dequeue();
-
-                if (!this._visited[vertex])
+                foreach (var item in _allNodes)
                 {
-                    this._visited[vertex] = true;
-                    foreach (var item in this._adjacencyList[vertex])
+                    foreach (var jtem in _allNodes)
                     {
-                        if (!this._visited[item.Key])
+                        long dist = dists[item][ktem] + dists[ktem][jtem];
+
+                        if (dist < dists[item][jtem])
                         {
-                            this._visited[item.Key] = true;
-                            dist[item.Key] = countIteration;
-                            q.Enqueue(item.Key);
+                            dists[item][jtem] = dist;
                         }
                     }
                 }
-                else
-                {
-                    if (dist[vertex] < countIteration)
-                    {
-                        dist[vertex] = countIteration;
-                    }
-                    q.Dequeue();
-                }
-
-                countIteration++;
             }
+
+            return dists;
         }
-
-        private int MinRadius(Dictionary<T, int> eccentricities)
+        
+        public void Center()
         {
-            int min = Convert.ToInt32(1e9);
-            foreach (var ecc in eccentricities)
+            Dictionary<string, Dictionary<string, long>> dists = ShortPaths();
+            Dictionary<string, long> maxes = new Dictionary<string, long>();
+            foreach (var item in dists)
             {
-                min = Math.Min(min, ecc.Value);
-            }
-
-            return min;
-        }
-
-        public List<T> FindGraphCenter()
-        {
-            List<T> centerResult = new List<T>();
-            Dictionary<T, Dictionary<T, int>> dists = new Dictionary<T, Dictionary<T, int>>();
-
-            foreach (var dict in this._adjacencyList)
-            {
-                Dictionary<T, int> currentDist;
-                Bfs(dict.Key, out currentDist);
-                dists[dict.Key] = currentDist;
-            }
-
-            Dictionary<T, int> eccentricities = new Dictionary<T, int>();
-            foreach (var dist in dists)
-            {
-                int max = dist.Value[dist.Key];
-                foreach (var item in dist.Value)
+                long max = -1;
+                foreach (var elem in item.Value)
                 {
-                    if (item.Value > max)
+                    if (elem.Value > max)
                     {
-                        max = item.Value;
+                        max = elem.Value;
                     }
                 }
-
-                eccentricities[dist.Key] = max;
+                maxes.Add(item.Key, max);
             }
 
-            int radius = MinRadius(eccentricities);
-
-            foreach (var item in eccentricities)
+            long min = long.MaxValue;
+            List<string> center = new List<string>();
+            foreach (var item in maxes)
             {
-                if (item.Value == radius)
+                if (item.Value < min)
                 {
-                    centerResult.Add(item.Key);
+                    min = item.Value;
                 }
             }
 
-            return centerResult;
+            foreach (var item in maxes)
+            {
+                if (item.Value == min)
+                {
+                    center.Add(item.Key);
+                }
+            }
+
+            foreach (var item in center)
+            {
+                Console.Write($"{item} ");
+            }
+
+            Console.WriteLine();
         }
 
-        public Dictionary<int, KeyValuePair<T, T>> IncidenceList()
+        public Dictionary<int, KeyValuePair<string, string>> IncidenceList()
         {
-            Dictionary<int, KeyValuePair<T, T>> incidenceList = new Dictionary<int, KeyValuePair<T, T>>();
+            Dictionary<int, KeyValuePair<string, string>> incidenceList = new Dictionary<int, KeyValuePair<string, string>>();
 
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
             {
-                foreach (KeyValuePair<T, int> item in dict.Value)
+                foreach (KeyValuePair<string, int> item in dict.Value)
                 {
                     if (!incidenceList.ContainsKey(item.Value))
                     {
-                        incidenceList.Add(item.Value, new KeyValuePair<T, T>(dict.Key, item.Key));
+                        incidenceList.Add(item.Value, new KeyValuePair<string, string>(dict.Key, item.Key));
                     }
                 }
             }
@@ -423,15 +437,15 @@ namespace Graph
             return incidenceList;
         }
 
-        public Graph<T> MinOstovTree()
+        public Graph MinOstovTree()
         {
-            Dictionary<int, KeyValuePair<T, T>> incidenceList = IncidenceList();
+            Dictionary<int, KeyValuePair<string, string>> incidenceList = IncidenceList();
             var sortedIncidenceList = incidenceList.OrderBy(n => n.Key);
 
-            HashSet<T> used = new HashSet<T>();
-            Dictionary<int, KeyValuePair<T, T>> answer = new Dictionary<int, KeyValuePair<T, T>>();
+            HashSet<string> used = new HashSet<string>();
+            Dictionary<int, KeyValuePair<string, string>> answer = new Dictionary<int, KeyValuePair<string, string>>();
 
-            foreach (KeyValuePair<int, KeyValuePair<T, T>> item in sortedIncidenceList)
+            foreach (KeyValuePair<int, KeyValuePair<string, string>> item in sortedIncidenceList)
             {
                 if (!used.Contains(item.Value.Key) || !used.Contains(item.Value.Value))
                 {
@@ -448,7 +462,7 @@ namespace Graph
                 }
             }
 
-            Graph<T> graph = new Graph<T>(true, false);
+            Graph graph = new Graph(true, false);
             foreach (var item in answer)
             {
                 if (!graph[item.Value.Key])
@@ -467,15 +481,226 @@ namespace Graph
             return graph;
         }
 
+        public Dictionary<string, long> Dijkstra(string node)
+        {
+            ClearVisited();
+            _visited[node] = true;
+            var currentNode = _adjacencyList[node];
+            
+            InstantiateAllNodesList();
+            foreach (var item in _allNodes)
+            {
+                if (!item.Equals(node))
+                {
+                    if (!currentNode.ContainsKey(item))
+                    {
+                        currentNode.Add(item, Int32.MaxValue);
+                    }
+                }
+                else
+                {
+                    currentNode.Add(item, 0);
+                }
+            }
+
+            Dictionary<string, long> dists = new Dictionary<string, long>();
+
+            for (int i = 0; i < _allNodes.Count; ++i)
+            {
+                dists.Add(_allNodes[i], currentNode[_allNodes[i]]);
+            }
+            
+            foreach (var element in _allNodes)
+            {
+                long min = Int32.MaxValue;
+                string w = _allNodes[0];
+
+                foreach (var nextElement in _allNodes)
+                {
+                    if (!_visited[nextElement] && dists[nextElement] < min)
+                    {
+                        min = dists[nextElement];
+                        w = nextElement;
+                    }
+                }
+
+                _visited[w] = true;
+
+                foreach (var nextElement in _allNodes)
+                {
+                    long dist = dists[w] + this[w, nextElement];
+
+                    if (!_visited[nextElement] && dist < dists[nextElement])
+                    {
+                        dists[nextElement] = dist;
+                    }
+                }
+            }
+
+            return dists;
+        }
+
+        public Dictionary<string, Dictionary<string, long>> Floyd()
+        {
+            ClearVisited();
+            InstantiateAllNodesList();
+
+            Dictionary<string, Dictionary<string, long>> dists = new Dictionary<string, Dictionary<string, long>>();
+
+            foreach (var item in _allNodes)
+            {
+                dists.Add(item, new Dictionary<string, long>());
+                foreach (var jtem in _allNodes)
+                {
+                    if (item.Equals(jtem))
+                    {
+                        dists[item].Add(jtem, 0);
+                    }
+                    else
+                    {
+                        dists[item].Add(jtem, this[item, jtem]);
+                    }
+                }
+            }
+
+            foreach (var ktem in _allNodes)
+            {
+                foreach (var item in _allNodes)
+                {
+                    foreach (var jtem in _allNodes)
+                    {
+                        long dist = dists[item][ktem] + dists[ktem][jtem];
+
+                        if (dist < dists[item][jtem])
+                        {
+                            dists[item][jtem] = dist;
+                        }
+                    }
+                }
+            }
+
+            return dists;
+        }
+
+        public Dictionary<string, long> FordBellman(string node)
+        {
+            Dictionary<string, long> dists = new Dictionary<string, long>();
+            Dictionary<string, string> paths = new Dictionary<string, string>();
+
+            foreach (var dict in _adjacencyList)
+            {
+                dists.Add(dict.Key, int.MaxValue);
+                paths.Add(dict.Key, "-1");
+            }
+
+            dists[node] = 0;
+
+            string x = "";
+            for (int i = 0; i < _adjacencyList.Count - 1; ++i)
+            {
+                x = "-1";
+                foreach (var dict in _adjacencyList)
+                {
+                    foreach (var item in dict.Value)
+                    {
+                        string first = dict.Key;
+                        string second = item.Key;
+
+                        int weight = item.Value;
+
+                        if (dists[first] < int.MaxValue && dists[second] > dists[first] + weight)
+                        {
+                            dists[second] = dists[first] + weight;
+                            paths[second] = first;
+                            x = second;
+                        }
+                    }
+                }
+            }
+
+            if (x == "-1")
+            {
+                Console.WriteLine("No negative cycle");
+
+                foreach (var item in _adjacencyList)
+                {
+                    if (item.Key != node)
+                    {
+                        List<string> path = new List<string>();
+                        string cur = item.Key;
+                        path.Add(cur);
+
+                        while (paths[cur] != "-1")
+                        {
+                            cur = paths[cur];
+                            path.Add(cur);
+                        }
+
+                        path.Reverse();
+                        Console.Write($"{item.Key}: ");
+                        for (int i = 0; i < path.Count; ++i)
+                        {
+                            Console.Write(path[i] + " ");
+                        }
+
+                        Console.WriteLine();
+                    }
+                }
+            }
+            else
+            {
+                string y = x;
+            }
+
+            // Console.WriteLine("Incidence list:");
+            // foreach (var item in ancestors)
+            // {
+            //     Console.WriteLine($"{item.Key} --- {item.Value}");
+            // }
+            //
+            // if (x.Equals("-1"))
+            // {
+            //     Console.WriteLine($"No negative cycle from {node}");
+            // }
+            // else
+            // {
+            //     Console.WriteLine($"x: {x}");
+            //     string y = x;
+            //
+            //     for (int i = 0; i < _adjacencyList.Count; ++i)
+            //     {
+            //         y = ancestors[y];
+            //     }
+            //
+            //     List<string> path = new List<string>();
+            //     for (string cur = y; !cur.Equals(x); cur = ancestors[cur])
+            //     {
+            //         path.Add(cur);
+            //     }
+            //
+            //     path.Reverse();
+            //
+            //     Console.WriteLine("Negative cycle: ");
+            //     for (int i = 0; i < path.Count; ++i)
+            //     {
+            //         Console.Write(path[i] + " ");
+            //     }
+            //
+            //     Console.WriteLine();
+            // }
+
+            return dists;
+        }
+
         // Method saving graph to a file with absolute "filePath"
         public void SaveGraph(string filePath)
         {
             using (StreamWriter fileWriter = new StreamWriter(filePath, false))
             {
-                foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+                foreach (KeyValuePair<string, Dictionary<string, int>> dict in _adjacencyList)
                 {
                     fileWriter.Write(dict.Key.ToString() + ' ');
-                    foreach (KeyValuePair<T, int> item in dict.Value)
+                    foreach (KeyValuePair<string, int> item in dict.Value)
                     {
                         fileWriter.Write(item.Key.ToString() + ':' + item.Value + ' ');
                     }
@@ -487,24 +712,28 @@ namespace Graph
 
         public void Clear()
         {
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
             {
                 dict.Value.Clear();
             }
             this._adjacencyList.Clear();
         }
 
-        public Graph<T> Copy()
+        public Graph Copy()
         {
-            Graph<T> graph = new Graph<T>();
+            Graph graph = new Graph(_isWeighted, _isDirectional);
 
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            string vertex = "";
+            foreach (var dict in _adjacencyList)
             {
-                graph.AddNode(dict.Key);
-                foreach (KeyValuePair<T, int> item in dict.Value)
+                vertex = dict.Key;
+                Dictionary<string, int> tempDict = new Dictionary<string, int>();
+                foreach (var item in dict.Value)
                 {
-                    graph.AddEdge(dict.Key, item.Key, item.Value);
+                    tempDict.Add(item.Key, item.Value);
                 }
+                
+                graph.AdjacencyList.Add(vertex, tempDict);
             }
 
             return graph;
@@ -513,10 +742,10 @@ namespace Graph
         public override string ToString()
         {
             string result = $"Is directed: {this._isDirectional}\nIs weighted: {this._isWeighted}\n";
-            foreach (KeyValuePair<T, Dictionary<T, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
             {
                 result += dict.Key.ToString() + " ";
-                foreach (KeyValuePair<T, int> item in dict.Value)
+                foreach (KeyValuePair<string, int> item in dict.Value)
                 {
                     if (this._isWeighted)
                     {
