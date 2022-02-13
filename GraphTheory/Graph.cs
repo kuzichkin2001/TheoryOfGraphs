@@ -18,6 +18,7 @@ namespace Graph
         private bool _isDirectional;
         private Dictionary<string, bool> _visited;
         private List<string> _allNodes;
+        private Dictionary<string, int> _colors;
         
         // Empty constructor instantiating an adjacency list
         public Graph(bool isWeighted = false, bool isDirectional = false)
@@ -27,6 +28,7 @@ namespace Graph
             this._isDirectional = isDirectional;
 
             this._visited = new Dictionary<string, bool>();
+            this._colors = new Dictionary<string, int>();
         }
 
         // Constructor that is reading a graph from file with absolute "filePath"
@@ -36,6 +38,7 @@ namespace Graph
             this._isDirectional = isDirectional;
             this._adjacencyList = new Dictionary<string, Dictionary<string, int>>();
             this._visited = new Dictionary<string, bool>();
+            this._colors = new Dictionary<string, int>();
 
             using (StreamReader fileReader = new StreamReader(filePath, Encoding.UTF8))
             {
@@ -45,6 +48,7 @@ namespace Graph
                     string[] tempArr = line.Split();
                     string name = tempArr[0];
                     _visited[name] = false;
+                    _colors[name] = 0;
                     _adjacencyList[name] = new Dictionary<string, int>();
                     for (int i = 1; i < tempArr.Length; ++i)
                     {
@@ -219,7 +223,7 @@ namespace Graph
         {
             int count = 0;
 
-            foreach (KeyValuePair<string, Dictionary<string, int>> dict in this._adjacencyList)
+            foreach (KeyValuePair<string, Dictionary<string, int>> dict in _adjacencyList)
             {
                 if (dict.Value.ContainsKey(key))
                 {
@@ -306,33 +310,40 @@ namespace Graph
             return false;
         }
 
-        // public void IsGraphAcycled()
-        // {
-        //     Dictionary<string, int> colors = new Dictionary<string, int>();
-        //     string cycleStart = "-1";
-        //     
-        //     foreach (var item in _adjacencyList)
-        //     {
-        //         colors.Add(item.Key, 0);
-        //     }
-        //
-        //     foreach (var item in _adjacencyList)
-        //     {
-        //         if (Dfs(item.Key, ref colors, ref cycleStart))
-        //         {
-        //             break;
-        //         }
-        //     }
-        //
-        //     if (cycleStart == "-1")
-        //     {
-        //         Console.WriteLine("Acycled");
-        //     }
-        //     else
-        //     {
-        //         Console.WriteLine("Cycled");
-        //     }
-        // }
+        public bool DFS(string key)
+        {
+            _visited[key] = true;
+
+            foreach (var item in _adjacencyList)
+            {
+                if (!_visited[item.Key]) return DFS(item.Key);
+            }
+
+            return false; 
+        }
+        public bool IsGraphAcycled(string key)
+        {
+            _colors[key] = 1;
+            
+            foreach (var item in _adjacencyList)
+            {
+                if (!item.Key.Equals(key))
+                {
+                    string to = item.Key;
+                    if (_colors[to] == 0)
+                    {
+                        if (IsGraphAcycled(to)) return true;
+                    }
+                    else if (_colors[to] == 1)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            _colors[key] = 2;
+            return false;
+        }
         
         public Dictionary<string, Dictionary<string, long>> ShortPaths()
         {
@@ -649,47 +660,112 @@ namespace Graph
             }
             else
             {
-                string y = x;
+                Console.WriteLine("There's negative cycle.");
             }
 
-            // Console.WriteLine("Incidence list:");
-            // foreach (var item in ancestors)
-            // {
-            //     Console.WriteLine($"{item.Key} --- {item.Value}");
-            // }
-            //
-            // if (x.Equals("-1"))
-            // {
-            //     Console.WriteLine($"No negative cycle from {node}");
-            // }
-            // else
-            // {
-            //     Console.WriteLine($"x: {x}");
-            //     string y = x;
-            //
-            //     for (int i = 0; i < _adjacencyList.Count; ++i)
-            //     {
-            //         y = ancestors[y];
-            //     }
-            //
-            //     List<string> path = new List<string>();
-            //     for (string cur = y; !cur.Equals(x); cur = ancestors[cur])
-            //     {
-            //         path.Add(cur);
-            //     }
-            //
-            //     path.Reverse();
-            //
-            //     Console.WriteLine("Negative cycle: ");
-            //     for (int i = 0; i < path.Count; ++i)
-            //     {
-            //         Console.Write(path[i] + " ");
-            //     }
-            //
-            //     Console.WriteLine();
-            // }
-
             return dists;
+        }
+
+        public int FordFulkerson()
+        {
+            string start = "", end = "";
+            foreach (var vertex in _adjacencyList)
+            {
+                int inDegree = GetIncomingPower(vertex.Key);
+                int outDegree = GetOutgoingPower(vertex.Key);
+
+                if (inDegree == 0)
+                {
+                    start = vertex.Key;
+                }
+ 
+                if (outDegree == 0)
+                {
+                    end = vertex.Key;
+                }
+            }
+            
+            
+            Console.WriteLine($"start: {start}");
+            Console.WriteLine($"end: {end}");
+ 
+            int n = _adjacencyList.Count;
+            
+            Dictionary<int, string> verticesNumbersAreKeys = new Dictionary<int, string>();
+            Dictionary<string, int> verticesNamesAreKeys = new Dictionary<string, int>();
+ 
+            int num = 0;
+            foreach (var vertex in _adjacencyList)
+            {
+                verticesNumbersAreKeys.Add(num, vertex.Key);
+                verticesNamesAreKeys.Add(vertex.Key, num);
+                num++;
+            }
+
+            int startNumber = verticesNamesAreKeys[start];
+            int endNumber = verticesNamesAreKeys[end];
+            
+            int[,] cap = new int[n, n];
+            
+            num = 0;
+            foreach (var item in _adjacencyList)
+            {
+                foreach (var jtem in verticesNumbersAreKeys)
+                {
+                    if (item.Value.ContainsKey(jtem.Value))
+                    {
+                        cap[num, jtem.Key] = item.Value[jtem.Value];
+                        cap[jtem.Key, num] = 0;
+                    }
+ 
+                }
+                num++;
+            }
+            
+            for (int flow = 0; ;)
+            {
+                bool[] used = new bool[n];
+ 
+                int df = FindPath(cap, used, startNumber, endNumber, Int32.MaxValue);
+
+                if (df == 0)
+                {
+                    return flow;
+                }
+
+                Console.WriteLine(df);
+                flow += df;
+            }
+        }
+
+        public int FindPath(int[,] capacity, bool[] used, int u, int t, int f)
+        {
+            Console.WriteLine(-100);
+            if (u == t)
+            {
+                return f;
+            }
+
+            used[u] = true;
+
+            for (int v = 0; v < used.Length; ++v)
+            {
+                Console.Write($"{v} ");
+                if (!used[v] && capacity[u, v] > 0)
+                {
+                    int df = FindPath(capacity, used, v, t, Math.Min(f, capacity[u, v]));
+
+                    if (df > 0)
+                    {
+                        capacity[u, v] -= df;
+                        capacity[v, u] += df;
+
+                        return df;
+                    }
+                }
+            }
+
+            return 0;
         }
 
         // Method saving graph to a file with absolute "filePath"

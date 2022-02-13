@@ -76,6 +76,7 @@ namespace Graph
                     "14. N-perifery of graph (Dijkstra)\n" +
                     "15. All shortest paths in pairs (Floyd)\n" +
                     "16. All shortest paths from vertex U (Ford-Bellman)\n" +
+                    "17. Find Maximum flow of oriented weighted graph\n" +
                     "0. End Testing\n"
                 );
 
@@ -152,6 +153,9 @@ namespace Graph
                         break;
                     case 16:
                         FordBellman(graph);
+                        break;
+                    case 17:
+                        FordFulkerson(graph);
                         break;
                     case 0:
                         return;
@@ -377,7 +381,14 @@ namespace Graph
                 }
             }
 
-            // graph.IsGraphAcycled();
+            if (graph.IsGraphAcycled(key))
+            {
+                Console.WriteLine("Acycled");
+            }
+            else
+            {
+                Console.WriteLine("Cycled");
+            }
         }
 
         public static void Center(Graph graph)
@@ -522,6 +533,13 @@ namespace Graph
             }
 
             Console.WriteLine();
+        }
+
+        public static void FordFulkerson(Graph graph)
+        {
+            int result = graph.FordFulkerson();
+
+            Console.WriteLine($"Maximum flow: {result}");
         }
     }
 }
